@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Itsaya | Link Hub & Portfolio</title>
+  <meta name="description" content="Interactive link hub showcasing GitHub projects, portfolio and contact info." />
+  <link rel="preconnect" href="https://api.github.com" />
+  <style>
+    :root{
+      --bg:#0b1020; --card:#131a2b; --ink:#e9edf7; --muted:#9fb0d3; --accent:#7aa2ff; --chip:#1b2440; --ok:#37d67a;
+      --shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--ink);} 
+    .wrap{max-width:1000px;margin:0 auto;padding:24px;}
+    header{display:flex;align-items:center;gap:20px;padding:20px;border-radius:20px;background:linear-gradient(180deg, rgba(19,26,43,.9), rgba(19,26,43,.6));box-shadow:var(--shadow);} 
+    header img{width:84px;height:84px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;}
+    h1{font-size:28px;margin:0 0 4px}
+    .subtitle{color:var(--muted);font-size:14px}
+    .row{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:100px;background:#0f1628;border:1px solid #1f2a44;color:var(--ink);text-decoration:none;font-weight:600;transition:.2s;}
+    .btn:hover{transform:translateY(-1px);border-color:var(--accent);}
+    .icon{width:16px;height:16px;display:inline-block}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:22px}
+    .card{grid-column:span 12;background:var(--card);border:1px solid #1f2944;border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+    @media(min-width:800px){.card.half{grid-column:span 6}}
+
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{padding:6px 10px;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid #233055;font-size:12px}
+
+    .repo{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:14px;border:1px solid #202c4a;background:#0f1628}
+    .repo a{color:var(--ink);text-decoration:none;font-weight:700}
+    .repo a:hover{color:var(--accent)}
+    .repo .meta{color:var(--muted);font-size:12px;display:flex;gap:14px;flex-wrap:wrap}
+
+    .footer{color:var(--muted);font-size:12px;text-align:center;margin:30px 0 10px}
+
+    .switch{margin-left:auto}
+    .switch input{display:none}
+    .slider{position:relative;width:48px;height:28px;background:#2a3553;border-radius:999px;display:inline-block;border:1px solid #38466d;cursor:pointer}
+    .slider::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.25s}
+    input:checked + .slider{background:#0f1628}
+    input:checked + .slider::after{transform:translateX(20px);background:var(--accent)}
+
+    /* light mode */
+    body.light{--bg:#f6f8ff; --card:#ffffff; --ink:#0d162f; --muted:#5a6a8c; --accent:#2b6cff; --chip:#eef2ff; --shadow:0 10px 25px rgba(25,45,115,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img id="avatar" alt="avatar" src=""/>
+      <div>
+        <h1 id="name">Itsaya</h1>
+        <div class="subtitle" id="title">Data Analyst • Python • SQL • Tableau</div>
+        <div class="row">
+          <a class="btn" id="btnGithub" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn" id="btnLinkedIn" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn" id="btnPortfolio" target="_blank" rel="noopener">Portfolio</a>
+          <a class="btn" id="btnCV" target="_blank" rel="noopener">Download CV</a>
+          <a class="btn" id="btnEmail" href="#">Email</a>
+          <label class="switch" title="Toggle theme">
+            <input id="themeToggle" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card half" id="aboutCard">
+        <h2 style="margin:0 0 10px">About</h2>
+        <p id="bio">Data analyst focused on reporting automation, dashboards, and Python-based data workflows.</p>
+        <div class="chips" id="skills"></div>
+      </div>
+
+      <div class="card half">
+        <h2 style="margin:0 0 10px">GitHub Stats</h2>
+        <div class="chips" id="stats"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px">Featured Projects</h2>
+        <div class="grid" id="featured"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px">Recent Repositories</h2>
+        <div class="grid" id="repos"></div>
+      </div>
+    </section>
+
+    <div class="footer">© <span id="year"></span> <span id="footerName">Itsaya</span>. Built with ♥ and the GitHub API.</div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      githubUser: 'Itsaya27',
+      fullName: 'Itsaya Nakput',
+      title: 'Data Analyst • Python • SQL • Tableau',
+      email: 'itsaya.nakput@gmail.com',
+      phone: '+31682270972',
+      location: 'Susteren, Netherlands',
+      links: {
+        github: 'https://github.com/Itsaya27',
+        linkedin: 'https://www.linkedin.com/', // replace with your LinkedIn URL
+        portfolio: '#', // replace with your portfolio URL
+        cv: 'assets/Itsaya_CV.pdf' // Put a PDF in /assets/
+      },
+      skills: ['Python','SQL','Tableau','Excel','Jupyter Notebook','Web scraping','SAP Finance'],
+      featuredRepos: ['woz-scraper'],
+      recentReposCount: 6
+    };
+
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    document.body.classList.toggle('light', localStorage.theme==='light' || (!localStorage.theme && prefersLight));
+    const toggle = document.getElementById('themeToggle');
+    toggle.checked = document.body.classList.contains('light');
+    toggle.addEventListener('change', () => {
+      document.body.classList.toggle('light');
+      localStorage.theme = document.body.classList.contains('light') ? 'light' : 'dark';
+    });
+
+    document.getElementById('name').textContent = CONFIG.fullName;
+    document.getElementById('footerName').textContent = CONFIG.fullName;
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const btn = (id,url) => { const el = document.getElementById(id); el.href=url; el.target='_blank'; el.rel='noopener'; };
+    btn('btnGithub', CONFIG.links.github);
+    btn('btnLinkedIn', CONFIG.links.linkedin);
+    btn('btnPortfolio', CONFIG.links.portfolio);
+    btn('btnCV', CONFIG.links.cv);
+    const emailBtn = document.getElementById('btnEmail');
+    emailBtn.href = `mailto:${CONFIG.email}`;
+
+    const skillsWrap = document.getElementById('skills');
+    CONFIG.skills.forEach(s => {
+      const c = document.createElement('span'); c.className='chip'; c.textContent = s; skillsWrap.appendChild(c);
+    });
+
+    async function getJSON(url){
+      const res = await fetch(url, {headers:{'Accept':'application/vnd.github+json'}});
+      if(!res.ok) throw new Error('GitHub API error');
+      return res.json();
+    }
+
+    function fmtDate(iso){
+      const d = new Date(iso); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'});
+    }
+
+    function repoCard(r){
+      const div = document.createElement('div');
+      div.className='repo card half';
+      div.innerHTML = `
+        <a href="${r.html_url}" target="_blank" rel="noopener">${r.name}</a>
+        <div class="meta">
+          <span>★ ${r.stargazers_count}</span>
+          <span>⑂ ${r.forks_count}</span>
+          <span>Updated ${fmtDate(r.updated_at)}</span>
+          ${r.language ? `<span>${r.language}</span>` : ''}
+        </div>
+        ${r.description ? `<div style="color:var(--muted);font-size:14px">${r.description}</div>` : ''}
+      `;
+      return div;
+    }
+
+    async function load(){
+      try{
+        const user = await getJSON(`https://api.github.com/users/${CONFIG.githubUser}`);
+        document.getElementById('avatar').src = user.avatar_url;
+        document.getElementById('bio').textContent = user.bio || document.getElementById('bio').textContent;
+
+        const stats = document.getElementById('stats');
+        ['followers','following','public_repos','public_gists'].forEach(k=>{
+          const s = document.createElement('span'); s.className='chip'; s.textContent = `${k.replace('_',' ')}: ${user[k]}`; stats.appendChild(s);
+        });
+
+        let repos = await getJSON(`https://api.github.com/users/${CONFIG.githubUser}/repos?per_page=100&sort=updated`);
+        repos = repos.filter(r=>!r.fork);
+
+        const featuredWrap = document.getElementById('featured');
+        CONFIG.featuredRepos.forEach(name=>{
+          const r = repos.find(x=>x.name.toLowerCase()===name.toLowerCase());
+          if(r) featuredWrap.appendChild(repoCard(r));
+        });
+
+        repos.sort((a,b)=> b.stargazers_count - a.stargazers_count || new Date(b.updated_at)-new Date(a.updated_at));
+        const top = repos.filter(r=>!CONFIG.featuredRepos.map(n=>n.toLowerCase()).includes(r.name.toLowerCase())).slice(0, CONFIG.recentReposCount);
+
+        const list = document.getElementById('repos');
+        top.forEach(r=> list.appendChild(repoCard(r)) );
+
+      }catch(err){
+        console.error(err);
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>
