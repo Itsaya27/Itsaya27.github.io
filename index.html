@@ -71,7 +71,8 @@
     <section class="grid">
       <div class="card half" id="aboutCard">
         <h2 style="margin:0 0 10px">About</h2>
-        <p id="bio">Data analyst focused on reporting automation, dashboards, and Python-based data workflows.</p>
+        <p id="bio">Data analyst with finance background, turning business questions into clear dashboards and Python automations.
+  Focus: Tableau, SQL, web scraping, KPI reporting.</p>
         <div class="chips" id="skills"></div>
       </div>
 
@@ -132,7 +133,8 @@
     btn('btnPortfolio', CONFIG.links.portfolio);
     btn('btnCV', CONFIG.links.cv);
     const emailBtn = document.getElementById('btnEmail');
-    emailBtn.href = `mailto:${CONFIG.email}`;
+emailBtn.href = `mailto:${CONFIG.email}?subject=Hello%20Itsaya%20%E2%80%94%20from%20your%20portfolio&body=Hi%20Itsaya%2C%0D%0A`;
+
 
     const skillsWrap = document.getElementById('skills');
     CONFIG.skills.forEach(s => {
@@ -172,9 +174,11 @@
         document.getElementById('bio').textContent = user.bio || document.getElementById('bio').textContent;
 
         const stats = document.getElementById('stats');
-        ['followers','following','public_repos','public_gists'].forEach(k=>{
-          const s = document.createElement('span'); s.className='chip'; s.textContent = `${k.replace('_',' ')}: ${user[k]}`; stats.appendChild(s);
-        });
+const items = ['followers','following','public_repos','public_gists']
+  .map(k => `${k.replace('_',' ')}: ${user[k]}`);
+stats.innerHTML = items.every(t => t.endsWith(': 0'))
+  ? '<span class="chip">Getting started on GitHub 🚀</span>'
+  : items.map(t => `<span class="chip">${t}</span>`).join('');
 
         let repos = await getJSON(`https://api.github.com/users/${CONFIG.githubUser}/repos?per_page=100&sort=updated`);
         repos = repos.filter(r=>!r.fork);
@@ -192,8 +196,11 @@
         top.forEach(r=> list.appendChild(repoCard(r)) );
 
       }catch(err){
-        console.error(err);
-      }
+  console.error(err);
+  document.getElementById('repos').innerHTML =
+    '<div class="chip">Could not load GitHub data. Please refresh.</div>';
+}
+
     }
 
     load();
